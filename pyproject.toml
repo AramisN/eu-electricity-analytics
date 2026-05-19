@@ -1,0 +1,143 @@
+[project]
+name = "eu-electricity-analytics"
+version = "0.1.0"
+description = "Near-real-time lakehouse pipeline for ENTSO-E electricity market data."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [
+    { name = "Aramis Nasirianfar", email = "aramisnsr@gmail.com" }
+]
+keywords = ["data-engineering", "entso-e", "lakehouse", "snowflake", "dbt", "airflow"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+# Runtime dependencies — keep this list minimal; pin loosely.
+dependencies = [
+    "httpx>=0.27",
+    "pydantic>=2.7",
+    "python-dotenv>=1.0",
+    "tenacity>=8.2",       # retry with exponential backoff
+]
+
+[project.optional-dependencies]
+# Development dependencies — installed via `pip install -e ".[dev]"`
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+    "pytest-mock>=3.12",
+    "ruff>=0.4",
+    "mypy>=1.10",
+    "pre-commit>=3.7",
+    "ipython>=8.0",        # the REPL referenced in the Q1 plan
+]
+
+[project.urls]
+Homepage = "https://github.com/AramisN/eu-electricity-analytics"
+Repository = "https://github.com/AramisN/eu-electricity-analytics"
+Issues = "https://github.com/AramisN/eu-electricity-analytics/issues"
+
+# Console scripts (CLIs you'd install via the package).
+[project.scripts]
+entsoe-ingest = "ingestion.cli:main"
+
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ingestion"]
+
+# -----------------------------------------------------------------------------
+# Ruff — linter and formatter (replaces flake8/isort/black combo)
+# -----------------------------------------------------------------------------
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # Pyflakes
+    "I",    # isort (import order)
+    "B",    # flake8-bugbear (common bugs)
+    "C4",   # flake8-comprehensions
+    "UP",   # pyupgrade (modern Python idioms)
+    "SIM",  # flake8-simplify
+    "RUF",  # ruff-specific rules
+]
+ignore = [
+    "E501",  # line-too-long — handled by formatter
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101"]  # asserts allowed in tests
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+# -----------------------------------------------------------------------------
+# Mypy — static type checking
+# -----------------------------------------------------------------------------
+[tool.mypy]
+python_version = "3.11"
+strict = false              # start loose; ratchet up over time
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_return_any = true
+disallow_untyped_defs = false   # turn this on later
+no_implicit_optional = true
+ignore_missing_imports = true   # third-party libs without stubs
+
+# Stricter rules for our own code; permissive for tests.
+[[tool.mypy.overrides]]
+module = "ingestion.*"
+disallow_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+
+# -----------------------------------------------------------------------------
+# Pytest
+# -----------------------------------------------------------------------------
+[tool.pytest.ini_options]
+minversion = "8.0"
+addopts = [
+    "-ra",                  # short summary of all non-passing tests
+    "--strict-markers",
+    "--strict-config",
+    "--cov=ingestion",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: requires external services",
+]
+
+# -----------------------------------------------------------------------------
+# Coverage
+# -----------------------------------------------------------------------------
+[tool.coverage.run]
+source = ["src"]
+omit = ["tests/*", "*/__main__.py"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]
