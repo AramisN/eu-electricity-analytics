@@ -1,0 +1,98 @@
+# --- Secrets (NEVER commit these) ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials.json
+secrets/
+*.tfvars
+!*.tfvars.example
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+*.egg
+.eggs/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# --- Jupyter / IPython ---
+.ipynb_checkpoints/
+*.ipynb
+
+# --- Tooling ---
+.python-version  # uncomment if you don't want to pin via this file
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# --- Terraform ---
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+terraform.tfvars
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# --- dbt ---
+target/
+dbt_packages/
+logs/
+profiles.yml  # contains warehouse credentials
+.user.yml
+
+# --- Airflow ---
+airflow.cfg
+airflow.db
+airflow-webserver.pid
+logs/
+plugins/__pycache__/
+dags/__pycache__/
+
+# --- Data ---
+data/raw/
+data/processed/
+*.csv
+*.parquet
+*.json
+!sample_data/*.csv
+!sample_data/*.json
+
+# --- OS junk ---
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Desktop.ini
+SETUP_GUIDE.md
+docs/*/*.md
+docs/*.md
