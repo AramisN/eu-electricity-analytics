@@ -95,4 +95,5 @@ ehthumbs.db
 Desktop.ini
 SETUP_GUIDE.md
 docs/*/*.md
-docs/*.md
+docs/architecture.md
+docs/journal.md
