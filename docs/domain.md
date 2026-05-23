@@ -14,7 +14,8 @@
 
 This is a notebook, not an encyclopaedia. When something I wrote here
 turns out to be wrong, I correct it and note the change in the journal.
-The "Open questions" section is the to-learn queue.
+
+**Disclaimer**: AI was used as a tool to help me write in way that is easy for the reader to follow throgh by rephrasing it or add points I have learned from by using it as a learningg tool as well, so do your own due diligence after knowing this fact.
 
 ---
 
@@ -63,12 +64,9 @@ HVDC requires converter stations at each end (AC→DC, DC→AC). Examples: Fenno
 Estonia, Latvia, Lithuania disconnected from the post-Soviet BRELL grid (Belarus, Russia, Estonia, Latvia, Lithuania) and synchronised with Continental Europe via Poland. This was a planned, successful decoupling — not a blackout.
 Historical significance: ends 60 years of dependence on the Russian grid; geopolitical milestone tied to the war in Ukraine; engineering milestone because you don't normally re-sync 3 countries to a new area without disruption.
 
-
-
 ---
 
 ## 3. Key actors and their roles
-
 
 - **TSO** (Transmission System Operator): For Finland it is Fingrid and many countries can have at least one of them as these are the main power coordinators within a country and all other electricity companies or big consumers should interact with them. they specifically operate high-voltage transmission (typically 110 kV and above in Finland; 220/380 kV in continental EU).
 - **DSO** (Distribution System Operator): In most EU markets (including Finland), the ordinary person signs an electricity supply contract with a retailer (Helen, Lumme, Oomi, Väre, etc.), not directly with the DSO. The DSO bills the network/distribution fee separately. Two contracts, two parties.
@@ -80,8 +78,6 @@ Historical significance: ends 60 years of dependence on the Russian grid; geopol
 - **Aggregator** : Pools many small flexible resources (batteries, EV chargers, factory loads) into one "virtual" resource big enough to participate in the wholesale or balancing market. Sympower and Ingrid Capacity in your region.
 - **Power exchange** : these are closely related but not identical. A power exchange is the organisation that runs the marketplace. NEMO is a regulatory designation. Nord Pool is both: it's a power exchange, and it's the designated NEMO for the Nordics. EPEX SPOT is both.
 - **Regulator** : ACER sets EU-wide rules and arbitrates between national regulators. Energiavirasto is the Finnish national regulator that sets DSO/TSO allowed returns, approves tariffs, monitors market behaviour. Sister regulators in other EU countries: Bundesnetzagentur (Germany), CRE (France), Ofgem (UK — post-Brexit but still relevant), CNMC (Spain).
-
-
 
 ---
 
@@ -95,21 +91,98 @@ There are three main timeframes. For each, answer:
 
 ### Day-ahead market (DA)
 
-<!-- your answer -->
+- **When**: bids submitted through the morning; gate closes at **12:00 CET**.
+  The market is for delivery the **next day** (D+1) — every hour of tomorrow.
+- **Granularity**: one price per **bidding zone**, per **hour** (the EU is
+  moving toward a 15-minute MTU — Market Time Unit).
+- **Who participates**: nearly everyone — generators, retailers, large
+  industrial consumers, traders, battery operators — each acting through a
+  **BRP** (Balance Responsible Party).
+- **How the price is set**: not bilateral. All bids go into a **pool**. At
+  12:00 the **Euphemia** algorithm runs **market coupling** across all
+  coupled zones at once, respecting interconnector capacities, and produces
+  **one clearing price per zone per hour**. Results publish ~12:42 CET,
+  final ~13:00 CET.
+- **If you clear but reality differs**: once cleared, you're committed. A
+  seller who under-delivers, or a buyer who consumes more/less than bought,
+  is **in imbalance** and pays **imbalance charges** (settled days later).
+  Nobody "rejects" a delivery — the pool already matched everything;
+  mismatches are purely financial.
 
 ### Intraday market (ID)
 
-<!-- your answer -->
+- **When**: opens when day-ahead results are known; trades **continuously**
+  until close to delivery (commonly ~5–60 minutes before the hour).
+- **Granularity**: hourly plus shorter 15- and 30-minute products.
+- **Who participates**: anyone needing to **adjust their position** after
+  day-ahead — a wind farm whose forecast changed, a battery chasing a price
+  move, a trader working a spread.
+- **How the price is set**: **continuous trading**, like a stock-exchange
+  order book — live buy/sell offers, trade against them, no single clearing
+  price. European ID markets are linked via **SIDC** (Single Intraday
+  Coupling).
+- **Why it exists**: wind, solar, and demand forecasts get more accurate as
+  delivery approaches. The ID market lets participants correct the position
+  they locked in at day-ahead.
 
 ### Balancing market (BAL)
 
-<!-- your answer -->
+#### Part 1: the physical fix (reserve activation).
+
+The TSO (Fingrid) watches frequency continuously. Below 50 Hz = shortage; above = surplus. To fix it, the TSO activates reserves that BSPs (Balancing Service Providers) pre-sold:
+
+* FCR auto-responds in seconds — arrests the deviation.
+
+* aFRR auto-responds in seconds-to-minutes — restores frequency to 50.
+
+* mFRR is manually ordered within minutes for bigger events.
+
+These are real resources: a gas plant ramps up, a battery discharges, a demand-response aggregator curtails factory load. Shortage → activate upward reserves (generate more / consume less). Surplus → activate downward reserves.
+
+#### Part 2: the financial fix (imbalance settlement).
+
+##### Concrete money flow
+6pm hour. A gas plant scheduled for 200 MW trips at 6:15 — instant 200 MW shortage. Frequency starts dropping.
+
+1- FCR auto-arrests the drop within seconds across the synchronous area.
+
+2- Fingrid activates aFRR/mFRR — a battery (BSP) discharges, a hydro plant (BSP) ramps up — to cover the 200 MW.
+
+3- Fingrid pays those BSPs for the balancing energy.
+
+4- Days later: the gas plant's BRP is found 200 MW short. It's billed the imbalance price for that volume. That money roughly covers what Fingrid paid the BSPs.
+
+So the flow is: the BRP who caused the problem → TSO → the BSPs who fixed it.
+
+- **When**: **real-time**, operated separately by each TSO (Fingrid for
+  Finland).
+- **Why it exists**: day-ahead and intraday only *schedule* power. Reality
+  always deviates — a plant trips, wind drops, demand spikes. The balancing
+  market keeps the grid at exactly **50.0 Hz second by second**.
+- **Who participates**: **BSPs** (Balancing Service Providers) — generators,
+  batteries, and demand-response aggregators pre-qualified to sell reserve
+  capacity and energy to the TSO.
+- **How it works**: the TSO activates reserves as needed; the cost is
+  charged back to whichever BRP caused the imbalance, via **imbalance
+  settlement**.
 
 **Plus the reserves:** what's the difference between FCR, aFRR, mFRR?
 Order them from fastest activation to slowest, and write one line
 each on what triggers them.
 
-<!-- your answer -->
+Ordered fastest to slowest:
+
+- **FCR** (Frequency Containment Reserve) — activates within **seconds**,
+  fully automatic. *Arrests* a frequency deviation — stops it getting worse.
+  Shared across the whole synchronous area.
+- **aFRR** (automatic Frequency Restoration Reserve) — activates within
+  ~**30 seconds to 5 minutes**, automatic. *Restores* frequency back to
+  50.0 Hz and frees up FCR for the next event.
+- **mFRR** (manual Frequency Restoration Reserve) — activates within
+  ~**5–15 minutes**, manually ordered by the TSO. Backstop for larger or
+  longer-lasting deviations.
+
+Memory hook: **FCR catches it, aFRR restores it, mFRR backs them up.**
 
 ---
 
@@ -135,7 +208,32 @@ Walk through the clock-ticks:
 Use the abbreviations as they appear. The point is you can read them
 back in 6 months and still follow it.
 
-<!-- your scenario -->
+*Scenario: Helen (a Helsinki generator + retailer) selling into the Finnish
+day-ahead market. All times CET.*
+
+- **Wednesday ~11:30** — Helen's trading desk decides to offer 50 MWh from
+  a CHP plant for **hour 19:00–20:00 on Thursday**. They submit a sell offer
+  to **Nord Pool** (the **NEMO** for the Nordics): "50 MWh, FI zone, hour 19,
+  minimum €80/MWh."
+- **~11:55** — Every TSO (Fingrid, Svenska kraftnät, Statnett, Energinet…)
+  submits its **IGM**; ENTSO-E merges them into the **CGM**; cross-border
+  capacities (**NTC/ATC**) for hour 19 are set.
+- **12:00 — gate closure**. Bidding closes. The **Euphemia** algorithm
+  starts market coupling.
+- **~12:42 — clearing prices published**. Say FI clears at **€85/MWh** for
+  hour 19. Helen's €80 floor is below €85, so the offer **clears**. Helen is
+  now committed to inject 50 MWh during hour 19 and will receive
+  50 × €85 = **€4,250**.
+- **13:00 — final and binding. Intraday opens**. If Helen's plant later
+  looks unable to make full output, they can buy back part of the position
+  on the **intraday market** before delivery.
+- **Thursday 18:00–19:00 — delivery**. Helen's plant injects the power.
+  Grid frequency is held near 50.0 Hz by **FCR/aFRR** across the synchronous
+  area. If Helen delivers only 45 MWh, the 5 MWh shortfall is an
+  **imbalance** charged to Helen's **BRP**.
+- **A few days later — settlement**. Nord Pool pays Helen; grid fees flow
+  to Fingrid; any imbalance charges are billed; cross-border **congestion
+  rent** is split between TSOs.
 
 ---
 
@@ -153,7 +251,36 @@ back in 6 months and still follow it.
   exist?
 - What's "congestion rent" and who gets it?
 
-<!-- your answer -->
+**The contract side**: when a Finnish BRP "buys 100 MWh from Germany," there
+is no direct German-to-Finnish deal. All bids enter the coupled day-ahead
+pool. If the FI price ends up higher than the DE-LU price, the **Euphemia**
+algorithm schedules power to "flow" from DE toward FI on paper — up to the
+available interconnector capacity — to push the two prices closer together.
+The Finnish buyer settles at the FI clearing price, the German seller at the
+DE-LU price, and the spread (the **congestion rent**) goes to the TSOs whose
+interconnectors carried it.
+
+**The physics side**: electricity can't be addressed to a destination. It
+flows by physical law (Kirchhoff's laws), splitting across every available
+path. Finland (Nordic synchronous area) and Germany (Continental Europe
+synchronous area) are not directly AC-connected — power moves between them
+only through **HVDC** links. A rough physical path:
+
+```
+DE-LU →(Kontek HVDC)→ DK-East →(Storebælt)→ DK-West
+      →(NordLink HVDC)→ NO2 →(AC)→ NO1 → SE3
+      →(AC)→ SE2 → SE1 →(Fenno-Skan HVDC)→ FI
+```
+
+**The reconciliation**: there is never a literal "Germany sold to Finland"
+transaction. The market is one big equilibrium calculation; physical flows
+and financial trades are matched by netting, and transit countries are
+compensated via the **Inter-TSO Compensation (ITC)** mechanism.
+
+**Why this matters for the project**: "scheduled commercial exchanges"
+(the contract side) and "physical flows" (the physics side) are *separate
+datasets* on the ENTSO-E platform, and they will not show identical numbers.
+The data model must keep them distinct.
 
 ---
 
@@ -171,7 +298,32 @@ Europe split event or the **April 28, 2025** Iberian blackout. What
 happened? Why? What did the post-incident report conclude (if you've read
 it)? What does "low system inertia" mean?
 
-<!-- your paragraph -->
+"Security" here is a technical term about **system stability**, not cybersecurity.
+It has three overlapping meanings:
+
+**Operational (system) security** — second-by-second physics. The grid must
+hold 50.0 Hz, keep voltages in band, keep no line overloaded, and satisfy the
+**N-1 criterion**: at any moment, any single component (a generator, a line, a
+transformer) can fail without cascading into a blackout. N-1 is the foundational
+rule of European grid operation.
+
+**Adequacy** — over weeks, months, seasons: is there *enough* dispatchable
+capacity to meet demand plus reserves? A grid can be operationally secure right
+now and still face an adequacy gap next winter. A **dunkelflaute** — a cold,
+dark, windless stretch — is the classic adequacy stress test.
+
+**Security of supply** — over years: is there enough investment in generation,
+interconnection, and storage to keep the lights on long-term? This is the
+political/regulatory version; it appears in EU directives and ACER reports.
+
+**Real event — the Iberian blackout, 28 April 2025.** Spain, Portugal, and
+parts of southern France lost power for several hours. The investigation
+pointed to a cascading frequency event in a grid running on very high
+solar/wind and therefore low **inertia** — too few spinning synchronous
+machines to buffer the disturbance. It made "inertia," "grid-forming
+inverters," and "synchronous condensers" everyday vocabulary across the
+industry in 2025–2026. It's the reference example for why operational security
+gets *harder* as renewables grow.
 
 ---
 
@@ -184,7 +336,22 @@ it)? What does "low system inertia" mean?
 - What's an EIC code? What does the FI bidding zone code look like?
 - Why does the API use these codes instead of human-readable names?
 
-<!-- your answer -->
+A **bidding zone** is the geographic unit electricity is priced in. Within a zone there's one price per hour; between zones, prices differ when transmission
+is constrained.
+
+Mostly one zone per country — but not always. Norway has 5 (NO1–NO5), Sweden 4
+(SE1–SE4), Italy several. Germany and Luxembourg share one zone (DE-LU). Splits
+usually reflect internal transmission bottlenecks: if power can't flow freely
+within a country, it gets priced as separate zones.
+
+An **EIC code** (Energy Identification Code) is a 16-character identifier for
+every market object — bidding zones, participants, generating units,
+interconnectors. The Finnish bidding zone is `10YFI-1--------U`.
+
+Why codes, not names: they're unambiguous, language-neutral, machine-readable,
+and stable. "Finland" is ambiguous (country? bidding zone? control area?); the
+EIC code is exact. The ENTSO-E API uses them everywhere — my ingestion code
+will pass EIC codes, not names.
 
 ---
 
@@ -199,143 +366,154 @@ it)? What does "low system inertia" mean?
 - Why does ENTSO-E need this? (Hint: cross-border capacity calculation,
   security analysis across the whole synchronous area.)
 
-<!-- your answer -->
+**IGM (Individual Grid Model)** — a full snapshot of one TSO's grid: topology
+(substations, lines, transformers), switching state, generator dispatch, load,
+and interconnector flows. Both the physical wiring *and* the operational state.
+
+**CGM (Common Grid Model)** — all 39+ IGMs merged into one model of the whole
+interconnected system, assembled via regional coordination.
+
+**CGMES (CGM Exchange Standard)** — the XML-based format TSOs use to exchange
+these models. Built on the Common Information Model (CIM).
+
+Why it exists: you can't calculate cross-border transmission capacity, or run
+security analysis across a synchronous area, from one country's view alone.
+Power flows ignore borders, so the analysis needs the merged picture. Capacity
+calculation and coordinated security assessment run on the CGM.
 
 ---
 
 ## 10. The Finnish landscape — who's who
 
-Fill in what you know. For each, note: role, ownership type, rough size,
-data needs you'd guess they have.
-
 ### Finland's TSO
 
-- **Fingrid** — <!-- your notes -->
+- **Fingrid** — Finland's sole TSO. Operates the high-voltage backbone
+(110 kV+), runs the Finnish balancing market. Regulated monopoly, partly
+state-owned.
 
 ### Top Finnish DSOs
 
-- Caruna — <!-- your notes -->
-- Elenia — <!-- your notes -->
-- Helen Sähköverkko — <!-- your notes -->
-- Others worth knowing: <!-- list -->
+- **Caruna** (~720k customers, largest, infrastructure-investor owned)
+- **Elenia** (~440k, central Finland)
+- **Helen Sähköverkko** (Helsinki, city-owned)
+- Other: ~75 smaller municipal/regional DSOs.
 
 ### Major Finnish generators
 
-- Fortum — <!-- your notes -->
-- Helen — <!-- your notes -->
-- TVO (Teollisuuden Voima) — <!-- your notes -->
-- Pohjolan Voima (PVO) — <!-- your notes -->
-- Others: <!-- list -->
+- Fortum — (largest producer, partly state-owned,
+nuclear + hydro)
+- Helen — (Helsinki utility, generation + retail)
+- *TVO (Teollisuuden Voima) —  (operates the Olkiluoto nuclear plants)
+- *Pohjolan Voima (PVO) — (industrial-owned consortium).
+- Others: Wind developers: Ilmatar, Megatuuli, OX2,
+Taaleri.
 
 ### BESS operators & aggregators active in Finland / Nordics
 
-- Ingrid Capacity — <!-- your notes -->
-- Sympower — <!-- your notes -->
-- Capalo AI — <!-- your notes -->
-- Forus — <!-- your notes -->
-- Others you've heard of: <!-- list -->
+- Ingrid Capacity
+- Sympower
+- Forus
 
 ### Power exchange
 
-- Nord Pool — <!-- your notes -->
+- Nord Pool — runs the day-ahead and intraday markets for
+the Nordic and Baltic regions.
 
 ### Regulator
 
-- Energiavirasto — <!-- your notes -->
+- Energiavirasto — the Finnish national energy regulator; sets
+allowed returns for DSOs and the TSO, monitors the market. EU-level
+counterpart: **ACER**.
+
+***Mankala principle (Finnish quirk)** — a corporate model where a power company
+is owned by its customers (industrial firms, municipalities) and sells power to
+them at cost, not for profit. TVO and PVO work this way. Unique to Finland.
 
 ---
 
-## 11. Why this dataset for the project
-
-(Comes from §1 / §2 of our roadmap conversation. Write this in your own
-words — it's the elevator pitch.)
-
-**Prompts:**
-
-- Who is the imagined stakeholder for the platform I'm building?
-- What pain are they in today, without my platform?
-- What does "good" look like for them — what does my platform enable?
-- Why is ENTSO-E data the right source for that stakeholder, vs alternative
-  data sources?
-- What's interesting about this data engineering-wise (volume, schema,
-  velocity, weird quirks)?
-
-<!-- your answer -->
-
----
-
-## 12. Glossary
-
-Define each in your own words. If you can't, that goes under §13.
+## 11. Glossary
 
 ### Organisations & roles
 
-- ENTSO-E
-- TSO
-- DSO
-- NEMO
-- BRP
-- BSP
-- ACER
-- Energiavirasto
-- Nord Pool
-- EPEX SPOT
+- **ENTSO-E** — European Network of Transmission System Operators for
+  Electricity. EU-level association of ~40 TSOs; coordinates the grid, runs the
+  Transparency Platform, sets standards. Founded 2009.
+- **TSO** — Transmission System Operator. Operates a country's high-voltage
+  backbone. Fingrid in Finland.
+- **DSO** — Distribution System Operator. Operates the local medium/low-voltage
+  network — the last mile to consumers.
+- **NEMO** — Nominated Electricity Market Operator. Runs day-ahead/intraday
+  market coupling for bidding zones. E.g. Nord Pool, EPEX SPOT.
+- **BRP** — Balance Responsible Party. Financially responsible for matching its
+  schedule to actual delivery/consumption; pays imbalance charges.
+- **BSP** — Balancing Service Provider. Pre-qualified to sell reserves
+  (FCR/aFRR/mFRR) to the TSO.
+- **ACER** — EU Agency for the Cooperation of Energy Regulators. Sets EU-wide
+  rules, arbitrates between national regulators.
+- **Energiavirasto** — the Finnish national energy regulator.
+- **Nord Pool** — the power exchange / NEMO for the Nordic and Baltic markets.
+- **EPEX SPOT** — the dominant power exchange for Continental Europe.
 
 ### Market / time concepts
 
-- Day-ahead market (DA)
-- Intraday market (ID)
-- Balancing market (BAL)
-- MTU (Market Time Unit)
-- Gate closure
-- Bidding zone
-- Synchronous area
+- **Day-ahead market (DA)** — auction closing 12:00 CET for next-day hourly
+  delivery; one clearing price per zone per hour.
+- **Intraday market (ID)** — continuous trading after DA up to near real time;
+  corrects positions as forecasts sharpen.
+- **Balancing market (BAL)** — real-time, TSO-operated; keeps frequency at 50 Hz.
+- **MTU** — Market Time Unit. The trading granularity (60 min, moving to 15 min).
+- **Gate closure** — the deadline after which bids can't be submitted or changed
+  for a given market.
+- **Bidding zone** — geographic unit electricity is priced in.
+- **Synchronous area** — region where all generators run in sync at one frequency.
 
 ### Operational / technical
 
-- N-1 criterion
-- FCR, aFRR, mFRR
-- Adequacy
-- Inertia / synchronous inertia
-- Frequency containment
-- Grid-forming inverter (one-liner, optional)
+- **N-1 criterion** — the grid must survive any single component failure without
+  losing customers.
+- **FCR** — Frequency Containment Reserve. Seconds, automatic. Arrests frequency
+  deviations.
+- **aFRR** — automatic Frequency Restoration Reserve. Seconds-to-minutes,
+  automatic. Restores frequency to 50 Hz.
+- **mFRR** — manual Frequency Restoration Reserve. Minutes, manually ordered by
+  the TSO. Backstop.
+- **Adequacy** — whether enough capacity exists over time to meet demand +
+  reserves.
+- **Inertia** — rotational energy in spinning synchronous machines that buffers
+  frequency changes. Wind/solar inverters provide none.
+- **Grid-forming inverter** — an inverter that can set voltage and frequency
+  itself (synthetic inertia), unlike conventional grid-following inverters.
 
 ### Data / capacity / settlement
 
-- IGM, CGM, CGMES
-- ATC, NTC, FB (flow-based) capacity
-- EIC code
-- Euphemia (the algorithm)
-- ITC (Inter-TSO Compensation)
-- Congestion rent
-- Imbalance settlement
-- Mankala principle (Finnish quirk — look this one up)
+- **IGM / CGM / CGMES** — Individual Grid Model (one TSO) / Common Grid Model
+  (all merged) / the XML exchange standard for them.
+- **ATC / NTC** — Available / Net Transfer Capacity between zones.
+- **FB** — Flow-Based capacity calculation; the more advanced method used in the
+  Core/CWE region.
+- **EIC code** — Energy Identification Code. 16-character ID for market objects.
+- **Euphemia** — the algorithm that runs European day-ahead market coupling.
+- **ITC** — Inter-TSO Compensation. Compensates transit TSOs for cross-border
+  flows.
+- **Congestion rent** — the price-spread revenue when power flows across a
+  constrained interconnector; goes to the TSOs.
+- **Imbalance settlement** — the after-the-fact billing of BRPs for deviations
+  from their schedule.
+- **Mankala principle** — Finnish model where a power company is owned by its
+  customers and sells to them at cost.
 
 ---
 
-## 13. Open questions / things to research more
-
-A running list of things I haven't fully understood yet. Don't fake
-clarity — write the genuine question.
-
-- <!-- e.g. "How exactly does flow-based capacity calculation differ from NTC?" -->
-- <!-- e.g. "Why are negative prices increasing in 2025–2026? Mechanism?" -->
-- <!-- e.g. "What's a grid-forming inverter and why did Iberia care?" -->
-- <!-- add your own -->
-
----
-
-## 14. Sources I've used
-
-Keep this list honest. Even just titles + URLs.
+## Sources used
 
 - ENTSO-E Transparency Platform — https://transparency.entsoe.eu
-- ENTSO-E REST API User Guide (PDF, version X.Y) — <!-- link -->
-- <!-- add others as you read them -->
+- ENTSO-E REST API User Guide (PDF, version X.Y) — https://documenter.getpostman.com/view/7009892/2s93JtP3F6
+- Open search on google and wikipedia and AI
 
 ---
 
 ## Changelog
 
-- **YYYY-MM-DD** — Initial draft, sections 1–5 filled, others stubbed.
-- <!-- subsequent entries -->
+- **2026-05-20** — Initial draft, sections 1–5 filled, others stubbed.
+- **2026-05-23** — Sections 1 to 3
+- **2026-05-23** — Version 1, All sections filled.
